@@ -93,7 +93,7 @@ class Cookie
         }
 
         // from PHP source code
-        if (preg_match("/[=,; \t\r\n\013\014]/", $name)) {
+        if ($raw && preg_match("/[=,; \t\r\n\013\014]/", $name)) {
             throw new \InvalidArgumentException(sprintf('The cookie name "%s" contains invalid characters.', $name));
         }
 
