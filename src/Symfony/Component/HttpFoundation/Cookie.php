@@ -29,6 +29,8 @@ class Cookie
     private $sameSite;
     private $secureDefault = false;
 
+    private static $charNameReserved = "=,; \t\r\n\013\014";
+
     const SAMESITE_NONE = 'none';
     const SAMESITE_LAX = 'lax';
     const SAMESITE_STRICT = 'strict';
@@ -93,7 +95,7 @@ class Cookie
         }
 
         // from PHP source code
-        if ($raw && preg_match("/[=,; \t\r\n\013\014]/", $name)) {
+        if ($raw && preg_match('/['.self::$charNameReserved.']/', $name)) {
             throw new \InvalidArgumentException(sprintf('The cookie name "%s" contains invalid characters.', $name));
         }
 
@@ -141,7 +143,13 @@ class Cookie
      */
     public function __toString()
     {
-        $str = ($this->isRaw() ? $this->getName() : urlencode($this->getName())).'=';
+        if ($this->isRaw()) {
+            $str = $this->getName();
+        } else {
+            $str = preg_replace_callback('/['.self::$charNameReserved.']/', [$this, 'rawurlencodeMatchZero'], $this->getName());
+        }
+
+        $str .= '=';
 
         if ('' === (string) $this->getValue()) {
             $str .= 'deleted; expires='.gmdate('D, d-M-Y H:i:s T', time() - 31536001).'; Max-Age=0';
@@ -174,6 +182,11 @@ class Cookie
         }
 
         return $str;
+    }
+
+    private function rawurlencodeMatchZero(array $match)
+    {
+        return rawurlencode($match[0]);
     }
 
     /**
