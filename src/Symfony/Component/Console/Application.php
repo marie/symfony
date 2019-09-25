@@ -17,6 +17,7 @@ use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
+use Symfony\Component\Console\Event\ConsoleStopEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\ExceptionInterface;
@@ -939,6 +940,19 @@ class Application implements ResetInterface
             $input->bind($command->getDefinition());
         } catch (ExceptionInterface $e) {
             // ignore invalid options/arguments for now, to allow the event listeners to customize the InputDefinition
+        }
+
+        if (extension_loaded('pcntl')) {
+            pcntl_async_signals(true);
+
+            $event = new ConsoleStopEvent($command, $input, $output);
+            $onStopHandler = function () use ($event) {
+                $this->dispatcher->dispatch($event, ConsoleEvents::STOP);
+                /** @TODO what exit code to return? */
+                exit;
+            };
+            pcntl_signal(SIGINT, $onStopHandler);
+            pcntl_signal(SIGTERM, $onStopHandler);
         }
 
         $event = new ConsoleCommandEvent($command, $input, $output);

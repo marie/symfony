@@ -28,6 +28,14 @@ final class ConsoleEvents
     const COMMAND = 'console.command';
 
     /**
+     * The STOP event allows you to perform some actions
+     * after the command execution was interrupted.
+     *
+     * @Event("Symfony\Component\Console\Event\ConsoleStopEvent")
+     */
+    const STOP = 'console.stop';
+
+    /**
      * The TERMINATE event allows you to attach listeners after a command is
      * executed by the console.
      *
