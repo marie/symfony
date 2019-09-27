@@ -56,7 +56,7 @@ Debug
 
  * Removed the `Debug` class, use the one from the `ErrorRenderer` component instead
  * Removed the `FlattenException` class, use the one from the `ErrorRenderer` component instead
- * Removed the component component in favor of the `ErrorHandler` component
+ * Removed the component in favor of the `ErrorHandler` component
 
 DependencyInjection
 -------------------
@@ -122,7 +122,7 @@ DoctrineBridge
  * Passing an `IdReader` to the `DoctrineChoiceLoader` when the query cannot be optimized with single id field will throw an exception, pass `null` instead
  * Not passing an `IdReader` to the `DoctrineChoiceLoader` when the query can be optimized with single id field will not apply any optimization
  * The `RegistryInterface` has been removed.
- * Added a new `getMetadataDriverClass` method in `AbstractDoctrineExtension` to replace class parameters. 
+ * Added a new `getMetadataDriverClass` method in `AbstractDoctrineExtension` to replace class parameters.
 
 DomCrawler
 ----------
@@ -160,7 +160,7 @@ Form
    without configuring a reference date.
  * Removed support for using `int` or `float` as data for the `NumberType` when the `input` option is set to `string`.
  * Removed support for using the `format` option of `DateType` and `DateTimeType` when the `html5` option is enabled.
- * Using names for buttons that do not start with a letter, a digit, or an underscore leads to an exception.
+ * Using names for buttons that do not start with a lowercase letter, a digit, or an underscore leads to an exception.
  * Using names for buttons that do not contain only letters, digits, underscores, hyphens, and colons leads to an
    exception.
  * Using the `date_format`, `date_widget`, and `time_widget` options of the `DateTimeType` when the `widget` option is
@@ -332,7 +332,7 @@ HttpKernel
     }
     ```
 
-   As many bundles must be compatible with a range of Symfony versions, the current 
+   As many bundles must be compatible with a range of Symfony versions, the current
    directory convention is not deprecated yet, but it will be in the future.
  * Removed the second and third argument of `KernelInterface::locateResource`
  * Removed the second and third argument of `FileLocator::__construct`
@@ -413,6 +413,24 @@ Routing
 Security
 --------
 
+ * Dropped support for passing more than one attribute to `AccessDecisionManager::decide()` and `AuthorizationChecker::isGranted()` (and indirectly the `is_granted()` Twig and ExpressionLanguage function):
+
+   **Before**
+   ```php
+   if ($this->authorizationChecker->isGranted(['ROLE_USER', 'ROLE_ADMIN'])) {
+       // ...
+   }
+   ```
+
+   **After**
+   ```php
+   if ($this->authorizationChecker->isGranted(new Expression("has_role('ROLE_USER') or has_role('ROLE_ADMIN')"))) {}
+
+   // or:
+   if ($this->authorizationChecker->isGranted('ROLE_USER')
+      || $this->authorizationChecker->isGranted('ROLE_ADMIN')
+   ) {}
+   ```
  * The `LdapUserProvider` class has been removed, use `Symfony\Component\Ldap\Security\LdapUserProvider` instead.
  * Implementations of `PasswordEncoderInterface` and `UserPasswordEncoderInterface` must have a new `needsRehash()` method
  * The `Role` and `SwitchUserRole` classes have been removed.
@@ -577,8 +595,6 @@ WebProfilerBundle
 
  * Removed the `ExceptionController::templateExists()` method
  * Removed the `TemplateManager::templateExists()` method
- * Removed the `web_profiler.intercept_redirects` config option,
-   toolbar for the redirected resource contains a link to the redirect response profile instead.
 
 Workflow
 --------
