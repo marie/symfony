@@ -17,7 +17,7 @@ use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
-use Symfony\Component\Console\Event\ConsoleStopEvent;
+use Symfony\Component\Console\Event\ConsoleSignalEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\ExceptionInterface;
@@ -48,6 +48,7 @@ use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\Exception\FatalThrowableError;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
+use Symfony\Component\SignalRegistry\SignalRegistryInterface;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -82,6 +83,7 @@ class Application implements ResetInterface
     private $defaultCommand;
     private $singleCommand = false;
     private $initialized;
+    private $signalRegistry;
 
     /**
      * @param string $name    The name of the application
@@ -106,6 +108,11 @@ class Application implements ResetInterface
     public function setCommandLoader(CommandLoaderInterface $commandLoader)
     {
         $this->commandLoader = $commandLoader;
+    }
+
+    public function setSignalRegistry(SignalRegistryInterface $signalRegistry)
+    {
+        $this->signalRegistry = $signalRegistry;
     }
 
     /**
@@ -942,17 +949,15 @@ class Application implements ResetInterface
             // ignore invalid options/arguments for now, to allow the event listeners to customize the InputDefinition
         }
 
-        if (extension_loaded('pcntl')) {
-            pcntl_async_signals(true);
-
-            $event = new ConsoleStopEvent($command, $input, $output);
+        if ($this->signalRegistry) {
+            $event = new ConsoleSignalEvent($command, $input, $output);
             $onStopHandler = function () use ($event) {
-                $this->dispatcher->dispatch($event, ConsoleEvents::STOP);
+                $this->dispatcher->dispatch($event, ConsoleEvents::SIGNAL);
                 /** @TODO what exit code to return? */
                 exit;
             };
-            pcntl_signal(SIGINT, $onStopHandler);
-            pcntl_signal(SIGTERM, $onStopHandler);
+            $this->signalRegistry->register(SIGINT, $onStopHandler);
+            $this->signalRegistry->register(SIGTERM, $onStopHandler);
         }
 
         $event = new ConsoleCommandEvent($command, $input, $output);

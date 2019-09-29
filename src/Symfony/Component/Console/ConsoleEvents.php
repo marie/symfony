@@ -33,7 +33,7 @@ final class ConsoleEvents
      *
      * @Event("Symfony\Component\Console\Event\ConsoleStopEvent")
      */
-    const STOP = 'console.stop';
+    const SIGNAL = 'console.signal';
 
     /**
      * The TERMINATE event allows you to attach listeners after a command is
