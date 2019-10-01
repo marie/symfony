@@ -84,6 +84,7 @@ class Application implements ResetInterface
     private $singleCommand = false;
     private $initialized;
     private $signalRegistry;
+    private $handlingSignals = [];
 
     /**
      * @param string $name    The name of the application
@@ -113,6 +114,15 @@ class Application implements ResetInterface
     public function setSignalRegistry(SignalRegistryInterface $signalRegistry)
     {
         $this->signalRegistry = $signalRegistry;
+    }
+
+    public function addHandlingSignals(int ...$signals)
+    {
+        foreach ($signals as $signal) {
+            if (!in_array($signal, $this->handlingSignals)) {
+                $this->handlingSignals[] = $signal;
+            }
+        }
     }
 
     /**
@@ -953,11 +963,11 @@ class Application implements ResetInterface
             $event = new ConsoleSignalEvent($command, $input, $output);
             $onStopHandler = function () use ($event) {
                 $this->dispatcher->dispatch($event, ConsoleEvents::SIGNAL);
-                /** @TODO what exit code to return? */
-                exit;
             };
-            $this->signalRegistry->register(SIGINT, $onStopHandler);
-            $this->signalRegistry->register(SIGTERM, $onStopHandler);
+
+            foreach ($this->handlingSignals as $handlingSignal) {
+                $this->signalRegistry->register($handlingSignal, $onStopHandler);
+            }
         }
 
         $event = new ConsoleCommandEvent($command, $input, $output);

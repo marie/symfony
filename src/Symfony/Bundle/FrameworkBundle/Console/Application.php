@@ -186,6 +186,10 @@ class Application extends BaseApplication
             $this->setCommandLoader($container->get('console.command_loader'));
         }
 
+        if (extension_loaded('pcntl') && $container->has('console.signal_registry')) {
+            $this->setSignalRegistry($container->get('console.signal_registry'));
+        }
+
         if ($container->hasParameter('console.command.ids')) {
             $lazyCommandIds = $container->hasParameter('console.lazy_command.ids') ? $container->getParameter('console.lazy_command.ids') : [];
             foreach ($container->getParameter('console.command.ids') as $id) {
