@@ -6,22 +6,15 @@ final class SignalRegistry implements SignalRegistryInterface
 {
     private $signals = [];
 
-    public function __construct(bool $asynchronousMode = true)
+    public function __construct()
     {
-        if ($asynchronousMode) {
-            pcntl_async_signals(true);
-        }
+        pcntl_async_signals(true);
     }
 
     public function register(int $signal, callable $callback): void
     {
         $this->signals[$signal][] = $callback;
         pcntl_signal($signal, [$this, 'handler']);
-    }
-
-    public function dispatch(): bool
-    {
-        return pcntl_signal_dispatch();
     }
 
     public function handler(int $signal): void

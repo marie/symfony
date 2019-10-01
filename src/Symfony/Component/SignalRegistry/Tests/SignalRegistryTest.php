@@ -3,6 +3,9 @@
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\SignalRegistry\SignalRegistry;
 
+/**
+ * @requires extension pcntl
+ */
 class SignalRegistryTest  extends TestCase
 {
     public function tearDown(): void
@@ -69,34 +72,5 @@ class SignalRegistryTest  extends TestCase
         posix_kill(posix_getpid(), SIGUSR2);
 
         $this->assertTrue($isHandled2);
-    }
-
-    public function testOneCallbackForASignal_DispatchMode_signalIsNotHandled()
-    {
-        $signalRegistry = new SignalRegistry(false);
-
-        $isHandled = false;
-        $signalRegistry->register(SIGUSR1, function() use (&$isHandled) {
-            $isHandled = true;
-        });
-
-        posix_kill(posix_getpid(), SIGUSR1);
-
-        $this->assertFalse($isHandled);
-    }
-
-    public function testOneCallbackForASignal_DispatchMode_signalIsHandled()
-    {
-        $signalRegistry = new SignalRegistry(false);
-
-        $isHandled = false;
-        $signalRegistry->register(SIGUSR1, function() use (&$isHandled) {
-            $isHandled = true;
-        });
-
-        posix_kill(posix_getpid(), SIGUSR1);
-        $signalRegistry->dispatch();
-
-        $this->assertTrue($isHandled);
     }
 }

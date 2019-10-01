@@ -20,7 +20,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\SignalRegistry\SignalRegistry;
 
 class RouterMatchCommandTest extends TestCase
 {
