@@ -13,6 +13,13 @@ final class SignalRegistry implements SignalRegistryInterface
 
     public function register(int $signal, callable $callback): void
     {
+        if (!isset($this->signals[$signal])) {
+            $previousCallback = pcntl_signal_get_handler($signal);
+            if (is_callable($previousCallback)) {
+                $this->signals[$signal][] = $previousCallback;
+            }
+        }
+
         $this->signals[$signal][] = $callback;
         pcntl_signal($signal, [$this, 'handler']);
     }

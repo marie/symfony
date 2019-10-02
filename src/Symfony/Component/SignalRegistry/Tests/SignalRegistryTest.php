@@ -15,7 +15,7 @@ class SignalRegistryTest  extends TestCase
         pcntl_signal(SIGUSR2, SIG_DFL);
     }
 
-    public function testOneCallbackForASignal_AsyncMode_signalIsHandled()
+    public function testOneCallbackForASignal_signalIsHandled()
     {
         $signalRegistry = new SignalRegistry();
 
@@ -29,7 +29,7 @@ class SignalRegistryTest  extends TestCase
         $this->assertTrue($isHandled);
     }
 
-    public function testTwoCallbacksForASignal_AsyncMode_bothCallbacksAreCalled()
+    public function testTwoCallbacksForASignal_bothCallbacksAreCalled()
     {
         $signalRegistry = new SignalRegistry();
 
@@ -49,7 +49,7 @@ class SignalRegistryTest  extends TestCase
         $this->assertTrue($isHandled2);
     }
 
-    public function testTwoSignals_AsyncMode_signalsAreHandled()
+    public function testTwoSignals_signalsAreHandled()
     {
         $signalRegistry = new SignalRegistry();
 
@@ -71,6 +71,26 @@ class SignalRegistryTest  extends TestCase
 
         posix_kill(posix_getpid(), SIGUSR2);
 
+        $this->assertTrue($isHandled2);
+    }
+
+    public function testTwoCallbacksForASignal_previousAndRegisteredCallbacksWereCalled()
+    {
+        $signalRegistry = new SignalRegistry();
+
+        $isHandled1 = false;
+        pcntl_signal(SIGUSR1, function() use (&$isHandled1) {
+            $isHandled1 = true;
+        });
+
+        $isHandled2 = false;
+        $signalRegistry->register(SIGUSR1, function() use (&$isHandled2) {
+            $isHandled2 = true;
+        });
+
+        posix_kill(posix_getpid(), SIGUSR1);
+
+        $this->assertTrue($isHandled1);
         $this->assertTrue($isHandled2);
     }
 }
