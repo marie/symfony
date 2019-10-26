@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\SignalRegistry;
 
 final class SignalRegistry implements SignalRegistryInterface
@@ -15,7 +24,7 @@ final class SignalRegistry implements SignalRegistryInterface
     {
         if (!isset($this->signals[$signal])) {
             $previousCallback = pcntl_signal_get_handler($signal);
-            if (is_callable($previousCallback)) {
+            if (\is_callable($previousCallback)) {
                 $this->signals[$signal][] = $previousCallback;
             }
         }
@@ -26,7 +35,7 @@ final class SignalRegistry implements SignalRegistryInterface
 
     public function handler(int $signal): void
     {
-        foreach($this->signals[$signal] as $callback) {
+        foreach ($this->signals[$signal] as $callback) {
             $callback($signal);
         }
     }
