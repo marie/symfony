@@ -186,7 +186,7 @@ class Application extends BaseApplication
             $this->setCommandLoader($container->get('console.command_loader'));
         }
 
-        if (extension_loaded('pcntl') && $container->has('console.signal_registry')) {
+        if (\extension_loaded('pcntl') && $container->has('console.signal_registry')) {
             $this->setSignalRegistry($container->get('console.signal_registry'));
         }
 

@@ -16,5 +16,4 @@ namespace Symfony\Component\Console\Event;
  */
 final class ConsoleSignalEvent extends ConsoleEvent
 {
-
 }

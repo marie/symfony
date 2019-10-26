@@ -119,7 +119,7 @@ class Application implements ResetInterface
     public function addHandlingSignals(int ...$signals)
     {
         foreach ($signals as $signal) {
-            if (!in_array($signal, $this->handlingSignals)) {
+            if (!\in_array($signal, $this->handlingSignals)) {
                 $this->handlingSignals[] = $signal;
             }
         }
